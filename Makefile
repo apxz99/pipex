@@ -6,7 +6,7 @@
 #    By: sarayapa <sarayapa@student.42bangkok.co    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/08/29 17:32:46 by sarayapa          #+#    #+#              #
-#    Updated: 2025/12/04 18:38:39 by sarayapa         ###   ########.fr        #
+#    Updated: 2025/12/05 11:49:08 by sarayapa         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -57,11 +57,11 @@ bonus: $(BUILD) $(SRCS_O) $(BONUS_O)
 	$(ARCHIVE) $(NAME) $(BONUS_O)
 
 clean:
-	rm -rf $(BUILD)
+	rm -rf $(BUILD) valgrind.rpt a.out input output
+
 
 fclean: clean
-	rm -f $(NAME) valgrind.rpt a.out input output pipex
-
+	rm -f $(NAME) pipex
 re:fclean all
 
 .PHONY: all clean fclean re debug
