@@ -6,13 +6,14 @@
 /*   By: sarayapa <sarayapa@student.42bangkok.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/27 18:51:59 by sarayapa          #+#    #+#             */
-/*   Updated: 2025/12/05 11:51:36 by sarayapa         ###   ########.fr       */
+/*   Updated: 2025/12/05 23:56:51 by sarayapa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./libft.h"
 #include <stdio.h>
 #include <sys/wait.h>
+#include <error.h>
 
 char *find_envpathforcmd(char *cmd, char **envp)
 {
@@ -59,6 +60,7 @@ char **format_argv(char *av, char **envp)
 int main(int ac, char **av, char **envp)
 {
 	int pipefd[2];
+	int pipe_err[2];
 	int infile;
 	int outfile;
 	int pid_1;
@@ -71,14 +73,15 @@ int main(int ac, char **av, char **envp)
 	infile = open(av[1], O_RDONLY);
 	outfile = open(av[4], O_WRONLY | O_CREAT | O_TRUNC , 0644 );
 	if(infile == -1 || outfile == -1)
-		return -1;
-	if(pipe(pipefd) == -1)
+		return (1);
+	if(pipe(pipefd) == -1 || pipe(pipe_err) == -1)
 		return (1);
 
 	pid_1 = fork();
 	if(pid_1 == 0)//child
 	{
 		close(pipefd[0]);
+		close(pipe_err[0]);
 
 		dup2(infile , STDIN_FILENO);
 		dup2(pipefd[1] , STDOUT_FILENO); //pipe[1] <- input
@@ -86,14 +89,20 @@ int main(int ac, char **av, char **envp)
 		close(pipefd[1]);
 
 		args1 = format_argv(av[2], envp);
-		if (!args1)
-			exit(127);
-		printf("%d\n",execve(args1[0], args1, envp));
+		if (!args1 || !args1[0])
+		{
+			write(pipe_err[1], "1", 1);
+			exit(1);
+		}
+		execve(args1[0], args1, envp);
+		write(pipe_err[1], "1", 1);
+		exit(1);
 	}
 	pid_2 = fork();
-	if(pid_2 == 0)//child
+	if(pid_2 == 0)//child2
 	{
 		close(pipefd[1]);
+		close(pipe_err[0]);
 
 		dup2(pipefd[0] , STDIN_FILENO); //pipe[0] -> output
 		dup2(outfile , STDOUT_FILENO);
@@ -101,16 +110,32 @@ int main(int ac, char **av, char **envp)
 		close(pipefd[0]);
 
 		args2 = format_argv(av[3], envp);
-		if (!args2)
-			exit(127);
-		printf("%d\n",execve(args2[0], args2, envp));
-		//execve("/usr/bin/cat", "/usr/bin/cat", environ);
+		if (!args2 || !args2[0])
+		{
+			write(pipe_err[1], "1", 1);
+			exit(1);
+		}
+		execve(args2[0], args2, envp);
+		write(pipe_err[1], "1", 1);
+		exit(1);
+
 	}
+
 	close(pipefd[0]);
 	close(pipefd[1]);
 
+	close(pipe_err[1]);
+
 	waitpid(pid_1, NULL, 0);
 	waitpid(pid_2, NULL, 0);
+
+	char c;
+	int n = read(pipe_err[0], &c, 1);
+	write(STDIN_FILENO, &n, 1);
+	close(pipe_err[0]);
+
+	if(n > 0)
+		exit(1);
 	return 0;
 }
 

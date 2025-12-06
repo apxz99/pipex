@@ -5,52 +5,58 @@
 
 char *find_envpathforcmd(char *cmd, char **envp)
 {
-	int i;
-	char *temp_path;
-	char **path;
+	int		i;
+	char	*temp_path;
+	char	**path;
 
-	i = 0;
-	while(envp[i])
+	path = NULL;
+	i = -1;
+	while(envp[++i] && !path)
 	{
 		if(ft_strncmp(envp[i],"PATH=",5) == 0)
 			path = ft_split(envp[i] + 5, ':');
-		i++;
 	}
-	i = 0;
-	while(path[i])
+	i = -1;
+	while(path[++i])
 	{
 		temp_path = ft_strjoin(ft_strjoin(path[i], "/"), cmd);
-		printf("%s\n", temp_path);
 		if(access(temp_path, X_OK) == 0)
 			return temp_path;
-		i++;
 	}
 	return NULL;
 }
-int	main(int argc, char **argv, char **envp)
+
+char **format_argv(char *av, char **envp)
 {
-	//char *envpath;
-	//char **path;
+	char **av_formated;
+	char *temp;
 
+	if (!av)
+		return NULL;
+	av_formated = ft_split(av, ' ');
+	if(av_formated[0] == NULL || av_formated[0][0] == '\0')
+		return NULL;
 
-	//char *temp[10];
-	//for (int i = 0; path[i] ; i++)
-	//{
-	//	temp[i] = ft_strjoin(path[i], "/reboot");
-	//	printf("%s\n",temp[i]);
-	//	if((access(temp[i], X_OK) == 0))
-	//	{
-	//		printf("X_OK : %s\n",temp[i]);
-	//		return(0);
-	//	}
-	//}
-	//printf("%s\n\n", find_envpathforcmd("reboot", envp));
-	//printf("%s\n\n", find_envpathforcmd("ls", envp));
+	temp = find_envpathforcmd(av_formated[0], envp);
+	if(temp == NULL)
+		return NULL;
+	free(av_formated[0]);
+	av_formated[0] = temp;
+	return(av_formated);
+}
+
+int	main(int argc, char **av, char **envp)
+{
+
 	printf("here");
-	printf("%d",execvp(argv[0] , argv));
-	//for(int i = 0; envp[i]; i++)
-	//{
-	//	printf("%s\n",envp[i]);
-	//}
+	char **args1 = format_argv(av[1], envp);
+	if (args1 == NULL)
+    {
+        //fprintf(stderr, "%s: command not found\n", av[1]);
+		printf("exit");
+        exit(127);   // มาตรฐาน POSIX
+    }
+	printf("execute");
+	execve(args1[0], args1, envp);
 	return(0);
 }
