@@ -6,7 +6,7 @@
 /*   By: sarayapa <sarayapa@student.42bangkok.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/29 17:14:39 by sarayapa          #+#    #+#             */
-/*   Updated: 2025/11/28 11:56:52 by sarayapa         ###   ########.fr       */
+/*   Updated: 2025/12/19 03:55:41 by sarayapa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,11 +68,30 @@ void	ft_putstr_fd(char *str, int fd);
 void	ft_putnbr_fd(int nbr, int fd);
 void	ft_putendl_fd(char *str, int fd);
 
+//typedef struct s_fd
+//{
+//	int	infile;
+//	int outfile;
+//	int pipefd[2];
+//}					t_fd;
+
 typedef struct s_list
 {
 	void			*content;
 	struct s_list	*next;
 }					t_list;
+
+typedef struct s_pipex
+{
+	int		pid[2];
+	int		pipefd[2];
+	int		infile;
+	int		outfile;
+	char	**envp;
+	char	**cmd1;
+	char	**cmd2;
+	char	*path;
+}	t_pipex;
 
 t_list	*ft_lstnew(void *content);
 void	ft_lstadd_front(t_list **lst, t_list *new);
