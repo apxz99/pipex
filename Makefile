@@ -6,7 +6,7 @@
 #    By: sarayapa <sarayapa@student.42bangkok.co    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/08/29 17:32:46 by sarayapa          #+#    #+#              #
-#    Updated: 2025/12/05 23:00:41 by sarayapa         ###   ########.fr        #
+#    Updated: 2025/12/12 16:58:06 by sarayapa         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -50,7 +50,7 @@ $(NAME): $(SRCS_O) $(BONUS_O)
 	$(ARCHIVE) $@ $^
 
 debug: all $(NAME)
-	@$(CC) $(CFLAGS) -g pipex.c libft.a -lbsd -o pipex
+	$(CC) $(CFLAGS) -g pipex.c libft.a -lbsd -o pipex
 #clear && $(CC) $(CFLAGS) *.c libft.a -lbsd && valgrind --leak-check=full -s --log-file=valgrind.rpt ./a.out
 
 bonus: $(BUILD) $(SRCS_O) $(BONUS_O)
