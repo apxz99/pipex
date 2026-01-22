@@ -70,8 +70,15 @@ man fork
 man dup2
 ```
 ```bash
-man execve
+man waitpid
 ```
+```bash
+man ACCESS
+```
+```bash
+man perror
+```
+
 ### AI Usage Disclosure
 AI tools were used **solely as learning assistance**, specifically for:
 - Clarifying UNIX system calls behavior (e.g. pipe, fork, execve)
