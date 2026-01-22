@@ -6,7 +6,7 @@
 /*   By: sarayapa <sarayapa@student.42bangkok.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/19 10:34:59 by sarayapa          #+#    #+#             */
-/*   Updated: 2025/12/26 10:07:17 by sarayapa         ###   ########.fr       */
+/*   Updated: 2026/01/22 19:55:24 by sarayapa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,14 +26,13 @@ void	ft_free_tab(char **tab)
 
 void	error_exit(char *exit_name, int errno, int code)
 {
-
-	if(errno == PATH)
+	if (errno == PATH)
 		ft_putstr_fd("pipex : No such file or directory: ", 2);
-	else if(errno == PERMISSION)
+	else if (errno == PERMISSION)
 		ft_putstr_fd("pipex : Permission denied :", 2);
-	else if(errno == COMMAND)
+	else if (errno == COMMAND)
 		ft_putstr_fd("pipex : Command not found: ", 2);
-	if(exit_name)
+	if (exit_name)
 		ft_putstr_fd(exit_name, 2);
 	ft_putstr_fd("\n", 2);
 	exit(code);

@@ -6,7 +6,7 @@
 /*   By: sarayapa <sarayapa@student.42bangkok.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/19 09:02:09 by sarayapa          #+#    #+#             */
-/*   Updated: 2025/12/26 09:58:38 by sarayapa         ###   ########.fr       */
+/*   Updated: 2026/01/22 19:52:16 by sarayapa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,9 @@ typedef struct s_pipex
 	int		error_status;
 	int		pid_check;
 	int		exit_status;
+	char	**av_formated;
+	char	*temp;
+
 }	t_pipex;
 
 void	*ft_calloc(size_t n, size_t size);

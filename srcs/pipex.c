@@ -6,7 +6,7 @@
 /*   By: sarayapa <sarayapa@student.42bangkok.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/19 09:00:14 by sarayapa          #+#    #+#             */
-/*   Updated: 2025/12/26 10:15:07 by sarayapa         ###   ########.fr       */
+/*   Updated: 2026/01/22 19:54:49 by sarayapa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ char	*find_envpath_for_cmd(char *cmd, t_pipex *px)
 		px->tmp = ft_strjoin(px->path[px->i], "/");
 		px->full_path = ft_strjoin(px->tmp, cmd);
 		free(px->tmp);
-		if (access(px->full_path, F_OK) == 0 || access(px->full_path, X_OK) == 0)
+		if (access(px->full_path, X_OK) == 0)
 			return (ft_free_tab(px->path), px->full_path);
 		free(px->full_path);
 	}
@@ -40,34 +40,31 @@ char	*find_envpath_for_cmd(char *cmd, t_pipex *px)
 
 char	**format_argv(char *av, t_pipex *px)
 {
-	char	**av_formated;
-	char	*temp;
-
 	if (!av || av[0] == '\0')
-		return (NULL);
-	av_formated = ft_split(av, ' ');
-	if (!av_formated || !av_formated[0])
+		return (error_exit("", COMMAND, 127), NULL);
+	px->av_formated = ft_split(av, ' ');
+	if (!px->av_formated || !px->av_formated[0])
 	{
 		error_exit(NULL, COMMAND, 127);
-		return (ft_free_tab(av_formated), NULL);
+		return (ft_free_tab(px->av_formated), NULL);
 	}
-	if(ft_strrchr(av, '/'))
+	if (ft_strrchr(av, '/'))
 	{
-		if (access(av_formated[0], F_OK) == 0 && access(av_formated[0], X_OK) == 0)
-			return (av_formated);
-		else if (access(av_formated[0], F_OK) == 0 && access(av_formated[0], X_OK) != 0)
-			error_exit(av_formated[0], PERMISSION, 126);
-		error_exit(av_formated[0], PATH, 127);
+		if (access(px->av_formated[0], X_OK) == 0)
+			return (px->av_formated);
+		else if (access(px->av_formated[0], X_OK) != 0)
+		{
+			ft_free_tab(px->av_formated);
+			error_exit(px->av_formated[0], PERMISSION, 126);
+		}
+		error_exit(px->av_formated[0], PATH, 127);
 	}
-	temp = find_envpath_for_cmd(av_formated[0], px);
-	if (!temp)
-	{
-		error_exit(av_formated[0], COMMAND, 127);
-		return (ft_free_tab(av_formated), NULL);
-	}
-	free(av_formated[0]);
-	av_formated[0] = temp;
-	return (av_formated);
+	px->temp = find_envpath_for_cmd(px->av_formated[0], px);
+	if (!px->temp)
+		return (ft_free_tab(px->av_formated), NULL);
+	free(px->av_formated[0]);
+	px->av_formated[0] = px->temp;
+	return (px->av_formated);
 }
 
 void	do_command_1(t_pipex *px)
@@ -80,6 +77,13 @@ void	do_command_1(t_pipex *px)
 		error_exit(px->av[1], PATH, 126);
 	}
 	px->cmd1 = format_argv(px->av[2], px);
+	if (!px->cmd1)
+	{
+		close(px->pipefd[0]);
+		close(px->pipefd[1]);
+		close(px->infile);
+		exit(127);
+	}
 	dup2(px->infile, STDIN_FILENO);
 	dup2(px->pipefd[1], STDOUT_FILENO);
 	close(px->pipefd[0]);
@@ -96,11 +100,17 @@ void	do_command_2(t_pipex *px)
 	px->outfile = open(px->av[4], O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (px->outfile == -1)
 	{
-		if (access(px->av[4], W_OK) != 0)
+		if (access(px->av[4], F_OK) == 0 && access(px->av[4], W_OK) != 0)
 			error_exit(px->av[4], PERMISSION, 1);
-		error_exit(px->av[4], PATH, 1);
 	}
 	px->cmd2 = format_argv(px->av[3], px);
+	if (!px->cmd2)
+	{
+		close(px->pipefd[0]);
+		close(px->pipefd[1]);
+		close(px->outfile);
+		exit(127);
+	}
 	dup2(px->pipefd[0], STDIN_FILENO);
 	dup2(px->outfile, STDOUT_FILENO);
 	close(px->pipefd[0]);
@@ -118,7 +128,6 @@ int	main(int ac, char **av, char **envp)
 
 	px.av = av;
 	px.envp = envp;
-
 	if (ac != 5)
 		return (ft_putstr_fd("Usage: ./pipex file1 cmd1 cmd2 file2\n", 2), 0);
 	if (pipe(px.pipefd) == -1)
@@ -131,12 +140,9 @@ int	main(int ac, char **av, char **envp)
 		do_command_2(&px);
 	close(px.pipefd[0]);
 	close(px.pipefd[1]);
-	px.pid_check = wait(&px.status);
-	while (px.pid_check > 0)
-	{
-		px.pid_check = wait(&px.status);
-		if (px.pid_check == px.pid[1])
-			px.exit_status = WEXITSTATUS(px.status);
-	}
-	return(px.exit_status);
+	waitpid(px.pid[0], NULL, 0);
+	waitpid(px.pid[1], &px.status, 0);
+	if (WIFEXITED(px.status))
+		return (WEXITSTATUS(px.status));
+	exit (1);
 }
