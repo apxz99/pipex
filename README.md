@@ -73,7 +73,7 @@ man dup2
 man waitpid
 ```
 ```bash
-man ACCESS
+man access
 ```
 ```bash
 man perror
