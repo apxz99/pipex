@@ -6,7 +6,7 @@
 /*   By: sarayapa <sarayapa@student.42bangkok.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/19 09:02:09 by sarayapa          #+#    #+#             */
-/*   Updated: 2026/01/22 19:52:16 by sarayapa         ###   ########.fr       */
+/*   Updated: 2026/01/23 14:34:03 by sarayapa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ typedef struct s_pipex
 	int		pipefd[2];
 	int		infile;
 	int		outfile;
-	int		status;
+	int		status_child2;
 	char	**envp;
 	char	**cmd1;
 	char	**cmd2;
@@ -62,7 +62,10 @@ void	ft_free_tab(char **tab);
 void	ft_putstr_fd(char *str, int fd);
 char	**format_argv(char *av, t_pipex *px);
 char	*find_envpath_for_cmd(char *cmd, t_pipex *px);
-void	error_exit(char *exit_name, int errno, int code);
+void	error_exit(char **exit_name, int errno, int code);
 char	*ft_strrchr(const char *s, int c);
+void	free_error(char **tab, int errno, int code);
+void	handle_child_processes(t_pipex *px);
+char	*ft_strdup(const char *s);
 
 #endif
